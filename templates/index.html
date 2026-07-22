@@ -45,7 +45,7 @@
                     <div class="book-author">by {{ book.author }}</div>
                     
                     <div class="book-footer">
-                        <span class="book-price">${{ "%.2f"|format(book.price) }}</span>
+                        <span class="book-price">₹{{ "%.2f"|format(book.price) }}</span>
                         
                         <form action="{{ url_for('add_to_cart', book_id=book.id) }}" method="POST">
                             <input type="hidden" name="quantity" value="1">
