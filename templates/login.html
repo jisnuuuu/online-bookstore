@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if form_type == 'login' %}Login - NovelNest{% else %}Register - NovelNest{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    {% if form_type == 'login' %}
+        <h2 class="form-title">Welcome Back</h2>
+        
+        <form action="{{ url_for('login') }}" method="POST">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+            
+            <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+        
+        <div class="form-footer-text">
+            Don't have an account? <a href="{{ url_for('register') }}">Sign up here</a>
+        </div>
+    {% else %}
+        <h2 class="form-title">Join NovelNest</h2>
+        
+        <form action="{{ url_for('register') }}" method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-control" placeholder="john_doe" required autocomplete="username">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="you@example.com" required autocomplete="email">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="new-password">
+            </div>
+            
+            <button type="submit" class="btn-primary">Create Account</button>
+        </form>
+        
+        <div class="form-footer-text">
+            Already have an account? <a href="{{ url_for('login') }}">Sign in here</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

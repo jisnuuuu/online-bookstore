@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} - NovelNest{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 20px;">
+    <a href="{{ url_for('index') }}" style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
+        <i class="fa-solid fa-arrow-left"></i> Back to Catalog
+    </a>
+</div>
+
+<div class="book-detail-container" style="background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-md); padding: 40px; display: grid; grid-template-columns: 1fr 2fr; gap: 40px;">
+    <!-- Book Image Cover -->
+    <div style="display: flex; align-items: flex-start; justify-content: center; background-color: #f1f5f9; padding: 30px; border-radius: var(--radius);">
+        {% if book.image_url %}
+            <img src="{{ book.image_url }}" alt="{{ book.title }} Cover" style="width: 100%; max-width: 250px; border-radius: 4px; box-shadow: var(--shadow-md);">
+        {% else %}
+            <div style="height: 350px; display: flex; align-items: center; justify-content: center; width: 100%;">
+                <i class="fa-solid fa-book" style="font-size: 8rem; color: #cbd5e1;"></i>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Book Information & purchase actions -->
+    <div style="display: flex; flex-direction: column;">
+        <span style="background-color: #e0e7ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; width: fit-content; margin-bottom: 15px;">
+            {{ book.genre or 'General' }}
+        </span>
+        <h1 style="font-size: 2.2rem; font-weight: 700; color: var(--secondary); margin-bottom: 5px; line-height: 1.2;">
+            {{ book.title }}
+        </h1>
+        <div style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 25px;">
+            by <strong style="color: var(--text-main);">{{ book.author }}</strong>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 20px 0; margin-bottom: 25px;">
+            <h3 style="font-size: 1rem; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Synopsis</h3>
+            <p style="color: var(--text-main); font-size: 1.05rem; line-height: 1.7;">
+                {{ book.description or 'No description available for this book.' }}
+            </p>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto;">
+            <div>
+                <span style="font-size: 0.9rem; color: var(--text-muted); display: block;">Price</span>
+                <span style="font-size: 2rem; font-weight: 700; color: var(--secondary);">${{ "%.2f"|format(book.price) }}</span>
+            </div>
+
+            <!-- Add to Cart Form -->
+            <form action="{{ url_for('add_to_cart', book_id=book.id) }}" method="POST" style="display: flex; align-items: center; gap: 15px;">
+                {% if book.stock > 0 %}
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <label for="quantity" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Quantity</label>
+                        <select name="quantity" id="quantity" class="form-control" style="width: 80px; padding: 6px;">
+                            {% for i in range(1, (book.stock + 1) if book.stock < 10 else 11) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="padding: 12px 30px; display: inline-flex; align-items: center; gap: 10px; margin-top: 20px;">
+                        <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                    </button>
+                {% else %}
+                    <span style="background-color: #fee2e2; color: #ef4444; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Out of Stock
+                    </span>
+                {% endif %}
+            </div>
+            
+            <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">
+                Availability: 
+                {% if book.stock > 5 %}
+                    <span style="color: var(--success); font-weight: 600;">In Stock ({{ book.stock }} remaining)</span>
+                {% elif book.stock > 0 %}
+                    <span style="color: var(--warning); font-weight: 600;">Low Stock ({{ book.stock }} remaining)</span>
+                {% else %}
+                    <span style="color: var(--danger); font-weight: 600;">Unavailable</span>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+@media(max-width: 768px) {
+    .book-detail-container {
+        grid-template-columns: 1fr !important;
+        padding: 20px !important;
+    }
+}
+</style>
+{% endblock %}

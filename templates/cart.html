@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - NovelNest{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 2rem; font-weight: 700; color: var(--secondary); margin-bottom: 30px;">Your Shopping Cart</h1>
+
+{% if cart_items %}
+    <div class="cart-layout" style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px;">
+        <!-- Cart Items List -->
+        <div style="background: var(--surface); padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase;">
+                        <th style="padding-bottom: 12px;">Item</th>
+                        <th style="padding-bottom: 12px; text-align: center;">Quantity</th>
+                        <th style="padding-bottom: 12px; text-align: right;">Price</th>
+                        <th style="padding-bottom: 12px; text-align: right;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 20px 0; display: flex; align-items: center; gap: 15px;">
+                                {% if item.book.image_url %}
+                                    <img src="{{ item.book.image_url }}" alt="{{ item.book.title }}" style="width: 50px; border-radius: 4px; box-shadow: var(--shadow-sm);">
+                                {% else %}
+                                    <div style="width: 50px; height: 70px; background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                        <i class="fa-solid fa-book" style="color: #cbd5e1;"></i>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <a href="{{ url_for('book_detail', book_id=item.book.id) }}" style="font-weight: 600; color: var(--secondary); text-decoration: none; display: block; font-size: 1.05rem;">
+                                        {{ item.book.title }}
+                                    </a>
+                                    <span style="font-size: 0.85rem; color: var(--text-muted);">by {{ item.book.author }}</span>
+                                </div>
+                            </td>
+                            <td style="padding: 20px 0; text-align: center; font-weight: 500;">
+                                {{ item.quantity }}
+                            </td>
+                            <td style="padding: 20px 0; text-align: right; color: var(--text-muted);">
+                                ${{ "%.2f"|format(item.book.price) }}
+                            </td>
+                            <td style="padding: 20px 0; text-align: right; font-weight: 600; color: var(--secondary);">
+                                ${{ "%.2f"|format(item.subtotal) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 20px;">
+                <a href="{{ url_for('index') }}" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-chevron-left"></i> Continue Shopping
+                </a>
+            </div>
+        </div>
+
+        <!-- Summary & Checkout Sidebar -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="background: var(--surface); padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; color: var(--secondary);">Order Summary</h3>
+                
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; color: var(--text-muted);">
+                    <span>Items Total</span>
+                    <span>${{ "%.2f"|format(total_price) }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px; color: var(--text-muted);">
+                    <span>Shipping</span>
+                    <span style="color: var(--success); font-weight: 600;">FREE</span>
+                </div>
+                
+                <div style="border-top: 1px solid var(--border); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <span style="font-weight: 600; font-size: 1.1rem;">Grand Total</span>
+                    <span style="font-size: 1.6rem; font-weight: 700; color: var(--secondary);">${{ "%.2f"|format(total_price) }}</span>
+                </div>
+                
+                {% if session.get('username') %}
+                    <form action="{{ url_for('checkout') }}" method="POST">
+                        <button type="submit" class="btn-primary" style="padding: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <i class="fa-solid fa-credit-card"></i> Proceed to Checkout
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-primary" style="display: block; text-align: center; text-decoration: none; padding: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Login to Checkout
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 80px 20px; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+        <i class="fa-solid fa-cart-flatbed-empty" style="font-size: 5rem; color: var(--text-muted); margin-bottom: 25px;"></i>
+        <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--secondary);">Your Cart is Empty</h3>
+        <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 30px;">Before you check out, you must add some books to your shopping cart. You'll find lots of interesting books on our home page.</p>
+        <a href="{{ url_for('index') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none; border-radius: 25px;">Explore Catalog</a>
+    </div>
+{% endif %}
+
+<style>
+@media(max-width: 992px) {
+    .cart-layout {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+{% endblock %}
