@@ -23,9 +23,15 @@
 
     <!-- Book Information & purchase actions -->
     <div style="display: flex; flex-direction: column;">
-        <span style="background-color: #e0e7ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; width: fit-content; margin-bottom: 15px;">
-            {{ book.genre or 'General' }}
-        </span>
+        {% if book.genre %}
+            <a href="{{ url_for('index', category=book.genre) }}" style="background-color: #e0e7ff; color: var(--primary); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; width: fit-content; margin-bottom: 15px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition);">
+                <i class="fa-solid fa-tag" style="font-size: 0.75rem;"></i> {{ book.genre }}
+            </a>
+        {% else %}
+            <span style="background-color: #f1f5f9; color: var(--text-muted); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; width: fit-content; margin-bottom: 15px;">
+                General
+            </span>
+        {% endif %}
         <h1 style="font-size: 2.2rem; font-weight: 700; color: var(--secondary); margin-bottom: 5px; line-height: 1.2;">
             {{ book.title }}
         </h1>
@@ -46,26 +52,35 @@
                 <span style="font-size: 2rem; font-weight: 700; color: var(--secondary);">₹{{ "%.2f"|format(book.price) }}</span>
             </div>
 
-            <!-- Add to Cart Form -->
-            <form action="{{ url_for('add_to_cart', book_id=book.id) }}" method="POST" style="display: flex; align-items: center; gap: 15px;">
-                {% if book.stock > 0 %}
-                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <label for="quantity" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Quantity</label>
-                        <select name="quantity" id="quantity" class="form-control" style="width: 80px; padding: 6px;">
-                            {% for i in range(1, (book.stock + 1) if book.stock < 10 else 11) %}
-                                <option value="{{ i }}">{{ i }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+            <!-- Add to Cart & Wishlist Actions -->
+            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                <form action="{{ url_for('add_to_cart', book_id=book.id) }}" method="POST" style="display: flex; align-items: center; gap: 15px;">
+                    {% if book.stock > 0 %}
+                        <div style="display: flex; flex-direction: column; gap: 5px;">
+                            <label for="quantity" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Quantity</label>
+                            <select name="quantity" id="quantity" class="form-control" style="width: 80px; padding: 6px;">
+                                {% for i in range(1, (book.stock + 1) if book.stock < 10 else 11) %}
+                                    <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
 
-                    <button type="submit" class="btn-primary" style="padding: 12px 30px; display: inline-flex; align-items: center; gap: 10px; margin-top: 20px;">
-                        <i class="fa-solid fa-cart-plus"></i> Add to Cart
-                    </button>
-                {% else %}
-                    <span style="background-color: #fee2e2; color: #ef4444; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
-                        <i class="fa-solid fa-triangle-exclamation"></i> Out of Stock
-                    </span>
-                {% endif %}
+                        <button type="submit" class="btn-primary" style="padding: 12px 25px; display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;">
+                            <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                        </button>
+                    {% else %}
+                        <span style="background-color: #fee2e2; color: #ef4444; padding: 10px 20px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
+                            <i class="fa-solid fa-triangle-exclamation"></i> Out of Stock
+                        </span>
+                    {% endif %}
+                </form>
+
+                <a href="{{ url_for('add_to_wishlist', book_id=book.id) }}" 
+                   class="btn-outline-wishlist {% if book.id in user_wishlist_ids %}active{% endif %}" 
+                   style="margin-top: 20px;">
+                    <i class="{% if book.id in user_wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+                    {% if book.id in user_wishlist_ids %}In Wishlist{% else %}Save to Wishlist{% endif %}
+                </a>
             </div>
             
             <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">

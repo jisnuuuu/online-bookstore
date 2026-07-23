@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}My Wishlist - NovelNest{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+    <div>
+        <h1 style="font-size: 2rem; font-weight: 700; color: var(--secondary); margin-bottom: 5px;">Your Wishlist</h1>
+        <p style="color: var(--text-muted);">Save your favorite books for later purchase or move them directly to your cart.</p>
+    </div>
+    {% if wishlist_items %}
+        <span style="background-color: #fee2e2; color: #ef4444; font-weight: 600; padding: 6px 16px; border-radius: 20px; font-size: 0.9rem;">
+            <i class="fa-solid fa-heart"></i> {{ wishlist_items|length }} Saved Books
+        </span>
+    {% endif %}
+</div>
+
+{% if wishlist_items %}
+    <div class="book-grid">
+        {% for item in wishlist_items %}
+            <div class="book-card">
+                <div class="book-image-container">
+                    {% if item.book.genre %}
+                        <a href="{{ url_for('index', category=item.book.genre) }}" class="card-genre-badge">
+                            {{ item.book.genre }}
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('remove_from_wishlist', book_id=item.book.id) }}" 
+                       class="wishlist-toggle-btn active" 
+                       title="Remove from Wishlist">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </a>
+
+                    {% if item.book.image_url %}
+                        <img src="{{ item.book.image_url }}" alt="{{ item.book.title }} Cover">
+                    {% else %}
+                        <i class="fa-solid fa-book" style="font-size: 5rem; color: #cbd5e1;"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="book-details">
+                    <a href="{{ url_for('book_detail', book_id=item.book.id) }}" class="book-title">{{ item.book.title }}</a>
+                    <div class="book-author">by {{ item.book.author }}</div>
+                    
+                    <div style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-muted);">
+                        Saved on {{ item.created_at.strftime('%b %d, %Y') }}
+                    </div>
+
+                    <div class="book-footer">
+                        <span class="book-price">₹{{ "%.2f"|format(item.book.price) }}</span>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{{ url_for('move_to_cart', book_id=item.book.id) }}" class="btn-sm" style="padding: 6px 12px;">
+                                <i class="fa-solid fa-cart-plus"></i> Move to Cart
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 80px 20px; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+        <i class="fa-regular fa-heart" style="font-size: 5rem; color: var(--text-muted); margin-bottom: 25px;"></i>
+        <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--secondary);">Your Wishlist is Empty</h3>
+        <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 30px;">You haven't saved any books to your wishlist yet. Explore our catalog and click the heart icon to save your favorites!</p>
+        <a href="{{ url_for('index') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none; border-radius: 25px;">Explore Catalog</a>
+    </div>
+{% endif %}
+{% endblock %}

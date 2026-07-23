@@ -428,5 +428,279 @@ main {
     .nav-links {
         width: 100%;
         justify-content: space-around;
+        flex-wrap: wrap;
     }
 }
+
+/* CATEGORY & DROPDOWN NAVIGATION STYLES */
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 8px 0;
+    z-index: 1000;
+    margin-top: 8px;
+}
+
+.nav-dropdown:hover .dropdown-menu,
+.nav-dropdown:focus-within .dropdown-menu {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.dropdown-item i {
+    width: 20px;
+    color: var(--primary);
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+    background-color: #f1f5f9;
+    color: var(--primary);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border);
+    margin: 6px 0;
+}
+
+.cat-count-badge {
+    background-color: #e2e8f0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.dropdown-item.active .cat-count-badge {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* CATEGORY PILLS FILTER BAR */
+.category-pills-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.category-pills-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.category-pills-container::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+.category-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.category-pill i {
+    color: var(--primary);
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.category-pill .pill-count {
+    background-color: #f1f5f9;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.category-pill:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.category-pill.active {
+    background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.category-pill.active i {
+    color: white;
+}
+
+.category-pill.active .pill-count {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: white;
+}
+
+.active-filter-tag {
+    background-color: #e0e7ff;
+    color: var(--primary);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.active-filter-tag a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.card-genre-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(4px);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-decoration: none;
+    z-index: 2;
+    transition: var(--transition);
+}
+
+.card-genre-badge:hover {
+    background-color: var(--primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+/* WISHLIST & NAV BADGE STYLES */
+.nav-badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-left: 4px;
+    line-height: 1;
+    display: inline-block;
+}
+
+.wishlist-badge {
+    background-color: #ef4444;
+}
+
+.cart-badge-count {
+    background-color: var(--primary);
+}
+
+.wishlist-toggle-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 1rem;
+    z-index: 2;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.wishlist-toggle-btn:hover {
+    transform: scale(1.15);
+    color: #ef4444;
+    background-color: #ffffff;
+    box-shadow: var(--shadow-md);
+}
+
+.wishlist-toggle-btn.active {
+    color: #ef4444;
+    background-color: #ffffff;
+}
+
+.btn-outline-wishlist {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border: 2px solid #fecaca;
+    background-color: #fef2f2;
+    color: #ef4444;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.btn-outline-wishlist:hover,
+.btn-outline-wishlist.active {
+    background-color: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+

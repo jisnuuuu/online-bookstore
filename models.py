@@ -15,6 +15,8 @@ class User(db.Model):
     
     # Relationships
     orders = db.relationship('Order', backref='user', lazy=True)
+    cart_items = db.relationship('CartItem', backref='user', lazy=True, cascade="all, delete-orphan")
+    wishlist_items = db.relationship('WishlistItem', backref='user', lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -33,6 +35,28 @@ class Book(db.Model):
     stock = db.Column(db.Integer, default=0)
     image_url = db.Column(db.String(500), nullable=True)
     description = db.Column(db.Text, nullable=True)
+
+class CartItem(db.Model):
+    __tablename__ = 'cart_items'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1, nullable=False)
+    
+    # Relationship
+    book = db.relationship('Book')
+
+class WishlistItem(db.Model):
+    __tablename__ = 'wishlist_items'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship
+    book = db.relationship('Book')
 
 class Order(db.Model):
     __tablename__ = 'orders'
