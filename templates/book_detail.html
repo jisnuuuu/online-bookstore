@@ -4,14 +4,14 @@
 
 {% block content %}
 <div style="margin-bottom: 20px;">
-    <a href="{{ url_for('index') }}" style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
+    <a href="{{ url_for('catalog') }}" style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
         <i class="fa-solid fa-arrow-left"></i> Back to Catalog
     </a>
 </div>
 
-<div class="book-detail-container" style="background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-md); padding: 40px; display: grid; grid-template-columns: 1fr 2fr; gap: 40px;">
+<div class="book-detail-container" style="padding: 40px; display: grid; grid-template-columns: 1fr 2fr; gap: 40px; position: relative;">
     <!-- Book Image Cover -->
-    <div style="display: flex; align-items: flex-start; justify-content: center; background-color: #f1f5f9; padding: 30px; border-radius: var(--radius);">
+    <div style="display: flex; align-items: flex-start; justify-content: center; background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 30px; border-radius: var(--radius);">
         {% if book.image_url %}
             <img src="{{ book.image_url }}" alt="{{ book.title }} Cover" style="width: 100%; max-width: 250px; border-radius: 4px; box-shadow: var(--shadow-md);">
         {% else %}
@@ -24,14 +24,15 @@
     <!-- Book Information & purchase actions -->
     <div style="display: flex; flex-direction: column;">
         {% if book.genre %}
-            <a href="{{ url_for('index', category=book.genre) }}" style="background-color: #e0e7ff; color: var(--primary); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; width: fit-content; margin-bottom: 15px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition);">
+            <a href="{{ url_for('catalog', category=book.genre) }}" style="background-color: rgba(16, 185, 129, 0.12); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.2); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; width: fit-content; margin-bottom: 15px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: var(--transition);">
                 <i class="fa-solid fa-tag" style="font-size: 0.75rem;"></i> {{ book.genre }}
             </a>
         {% else %}
-            <span style="background-color: #f1f5f9; color: var(--text-muted); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; width: fit-content; margin-bottom: 15px;">
+            <span style="background-color: rgba(255,255,255,0.05); color: var(--text-muted); padding: 5px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; width: fit-content; margin-bottom: 15px;">
                 General
             </span>
         {% endif %}
+
         <h1 style="font-size: 2.2rem; font-weight: 700; color: var(--secondary); margin-bottom: 5px; line-height: 1.2;">
             {{ book.title }}
         </h1>
@@ -69,7 +70,7 @@
                             <i class="fa-solid fa-cart-plus"></i> Add to Cart
                         </button>
                     {% else %}
-                        <span style="background-color: #fee2e2; color: #ef4444; padding: 10px 20px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
+                        <span style="background-color: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 20px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
                             <i class="fa-solid fa-triangle-exclamation"></i> Out of Stock
                         </span>
                     {% endif %}
@@ -93,7 +94,7 @@
                     <span style="color: var(--danger); font-weight: 600;">Unavailable</span>
                 {% endif %}
             </div>
-        </form>
+        </div>
     </div>
 </div>
 

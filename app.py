@@ -75,15 +75,27 @@ def inject_global_data():
 @app.route('/')
 def index():
     """
-    Home Page / Book Catalog with Search & Genre Category Filter.
+    High-Fidelity Web3 Dribbble Landing Page
+    """
+    books = Book.query.limit(4).all()
+    return render_template('landing.html', books=books)
+
+
+@app.route('/catalog')
+def catalog():
+    """
+    Book Catalog Storefront with Search & Genre Category Filter
     """
     search_query = request.args.get('search', '').strip()
     selected_category = request.args.get('category', '').strip()
+    genre_query = request.args.get('genre', '').strip()
     
     query = Book.query
 
     if selected_category:
         query = query.filter(Book.genre == selected_category)
+    elif genre_query:
+        query = query.filter(Book.genre.ilike(genre_query))
 
     if search_query:
         query = query.filter(
@@ -98,7 +110,8 @@ def index():
         'index.html', 
         books=books, 
         search_query=search_query, 
-        selected_category=selected_category
+        selected_category=selected_category,
+        genre_query=genre_query
     )
 
 
@@ -168,7 +181,7 @@ def login():
                 db.session.commit()
 
             flash(f'Welcome back, {user.username}!', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('catalog'))
         else:
             flash('Invalid email or password.', 'danger')
             
@@ -344,7 +357,7 @@ def checkout():
     
     if not cart_items:
         flash('Your cart is empty.', 'warning')
-        return redirect(url_for('index'))
+        return redirect(url_for('catalog'))
         
     total = 0
     order_items_data = []

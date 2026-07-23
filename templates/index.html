@@ -4,13 +4,13 @@
 
 {% block content %}
 <!-- Hero/Welcome Section -->
-<div class="hero-banner" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); color: white; padding: 60px 40px; border-radius: var(--radius); margin-bottom: 40px; text-align: center; box-shadow: var(--shadow-md);">
-    <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 10px;">Welcome to NovelNest</h1>
-    <p style="font-size: 1.1rem; opacity: 0.9; max-width: 600px; margin: 0 auto 25px;">
+<div class="hero-banner">
+    <h1>Welcome to NovelNest</h1>
+    <p>
         Discover, explore, and purchase your next favorite literary adventures at the lowest prices.
     </p>
     {% if not session.get('username') %}
-        <a href="{{ url_for('register') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none; border-radius: 25px; box-shadow: var(--shadow-lg);">Create An Account</a>
+        <a href="{{ url_for('register') }}" class="btn-primary" style="text-decoration: none;">Create An Account</a>
     {% endif %}
 </div>
 

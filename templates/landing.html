@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}NovelNest - Your Next Favorite Book is Just a Click Away{% endblock %}
+
+{% block content %}
+<!-- Dribbble Hero Section -->
+<div class="landing-hero">
+    <!-- SVG Connection Lines -->
+    <svg class="node-line-svg">
+        <defs>
+            <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(16, 185, 129, 0.2)" />
+                <stop offset="100%" stop-color="rgba(14, 165, 233, 0.05)" />
+            </linearGradient>
+        </defs>
+        <!-- Lines connecting floating nodes visually toward the center area -->
+        <path d="M 120 180 L 320 280" stroke="url(#lineGrad)" stroke-width="1.5" fill="none" stroke-dasharray="4 4" />
+        <path d="M 980 200 L 780 280" stroke="url(#lineGrad)" stroke-width="1.5" fill="none" stroke-dasharray="4 4" />
+        <path d="M 100 480 L 300 400" stroke="url(#lineGrad)" stroke-width="1.5" fill="none" stroke-dasharray="4 4" />
+        <path d="M 980 460 L 780 390" stroke="url(#lineGrad)" stroke-width="1.5" fill="none" stroke-dasharray="4 4" />
+    </svg>
+
+    <!-- Floating Node 1 (Top Left) -->
+    <a href="{{ url_for('catalog', genre='Fiction') }}" class="hero-node node-top-left" style="text-decoration: none; cursor: pointer;">
+        <div class="node-label">
+            <i class="fa-solid fa-book" style="color: var(--primary); font-size: 0.75rem;"></i>
+            Fiction <span>28,845</span>
+        </div>
+        <div class="node-dot"></div>
+    </a>
+
+    <!-- Floating Node 2 (Top Right) -->
+    <a href="{{ url_for('catalog', genre='Academic') }}" class="hero-node node-top-right" style="text-decoration: none; cursor: pointer;">
+        <div class="node-label">
+            <i class="fa-solid fa-graduation-cap" style="color: var(--accent); font-size: 0.75rem;"></i>
+            Academic <span>2,810</span>
+        </div>
+        <div class="node-dot"></div>
+    </a>
+
+    <!-- Floating Node 3 (Bottom Left) -->
+    <a href="{{ url_for('catalog', genre='Self-Help') }}" class="hero-node node-bottom-left" style="text-decoration: none; cursor: pointer;">
+        <div class="node-label">
+            <i class="fa-solid fa-hands-holding-child" style="color: var(--accent); font-size: 0.75rem;"></i>
+            Self-Help <span>19,348</span>
+        </div>
+        <div class="node-dot"></div>
+    </a>
+
+    <!-- Floating Node 4 (Bottom Right) -->
+    <a href="{{ url_for('catalog', genre='Biography') }}" class="hero-node node-bottom-right" style="text-decoration: none; cursor: pointer;">
+        <div class="node-label">
+            <i class="fa-solid fa-user-tie" style="color: var(--primary); font-size: 0.75rem;"></i>
+            Biography <span>4,430</span>
+        </div>
+        <div class="node-dot"></div>
+    </a>
+
+    <!-- Center Landing Content -->
+    <div class="hero-center">
+        <div class="hero-badge">
+            <i class="fa-solid fa-book-bookmark"></i>
+            Explore Thousands of Titles!
+            <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem; color: var(--text-muted); margin-left: 4px;"></i>
+        </div>
+        <h1>Your Next Favorite Book is Just a Click Away</h1>
+        <p>
+            Browse thousands of books across every genre — from bestsellers to hidden gems. Fast delivery, great prices, always in stock.
+        </p>
+        <div class="hero-actions">
+            <a href="{{ url_for('catalog') }}" class="btn-primary" style="text-decoration: none;">
+                Browse Books <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; margin-left: 4px;"></i>
+            </a>
+            {% if not session.get('username') %}
+                <a href="{{ url_for('register') }}" class="btn-secondary">Sign Up Now</a>
+            {% else %}
+                <a href="{{ url_for('catalog') }}" class="btn-secondary">Go to Catalog</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bottom Left Scroll -->
+    <div class="scroll-indicator">
+        <i class="fa-solid fa-chevron-down"></i>
+        02/03 · Scroll down
+    </div>
+
+    <!-- Bottom Right Progress -->
+    <div class="horizons-indicator">
+        <span>Book horizons</span>
+        <div class="horizons-bar">
+            <div class="horizons-progress"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 2: Explore by Genre (Insights layout) -->
+<div id="insights" style="padding-top: 50px; margin-top: 20px;">
+    <div class="section-title-wrap">
+        <h2 class="section-title">Explore by Genre</h2>
+        <p class="section-subtitle">Save your precious reading time. Find your next favorite story categorized by interests.</p>
+    </div>
+
+    <div class="insights-grid">
+        <!-- Genre Popularity Card -->
+        <div class="insight-card">
+            <div class="insight-badge">NovelNest Catalog Insights</div>
+            <div class="insight-value">98.2%</div>
+            <div class="insight-label">User Recommendation & Satisfaction Rating</div>
+            
+            <!-- Graphic Bar Chart (5 Genres) -->
+            <div class="columns-chart">
+                <div class="chart-col" data-label="Fiction"><div class="chart-col-fill" style="height: 95%;"></div></div>
+                <div class="chart-col" data-label="Self-Help"><div class="chart-col-fill" style="height: 60%;"></div></div>
+                <div class="chart-col" data-label="Academic"><div class="chart-col-fill" style="height: 85%;"></div></div>
+                <div class="chart-col" data-label="Sci-Fi"><div class="chart-col-fill" style="height: 70%;"></div></div>
+                <div class="chart-col" data-label="Biography"><div class="chart-col-fill" style="height: 45%;"></div></div>
+            </div>
+        </div>
+
+        <!-- Split Grid (Growth cards & Bar card) -->
+        <div class="growth-box">
+            <div class="insight-split-row" style="margin-top: 0;">
+                <div class="mini-growth-card">
+                    <span class="mini-growth-title">Titles Catalogued</span>
+                    <div class="mini-growth-value">
+                        19,250
+                        <span>+12%</span>
+                    </div>
+                </div>
+                <div class="mini-growth-card">
+                    <span class="mini-growth-title">Daily Shipments</span>
+                    <div class="mini-growth-value">
+                        324
+                        <span>+4%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opportunities Card -->
+            <div class="insight-card" style="flex: 1; padding: 25px;">
+                <div class="insight-badge">Weekly Trends Map</div>
+                <div style="font-weight: 700; font-size: 1.2rem; color: #ffffff; margin-bottom: 15px;">Trending Book Demands</div>
+                
+                <!-- Graphic Representation -->
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
+                        <span>Fiction demand & new catalog releases</span>
+                        <span style="color: var(--primary); font-weight: 600;">Active (+8%)</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); height: 6px; border-radius: 99px; overflow: hidden;">
+                        <div style="background: var(--primary); width: 80%; height: 100%; border-radius: 99px;"></div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted); margin-top: 8px;">
+                        <span>Academic textbook pre-orders</span>
+                        <span style="color: var(--accent); font-weight: 600;">Steady (+5%)</span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.05); height: 6px; border-radius: 99px; overflow: hidden;">
+                        <div style="background: var(--accent); width: 55%; height: 100%; border-radius: 99px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 3: Why Choose Us Section (Why NovelNest?) -->
+<div class="section-title-wrap" style="margin-bottom: 40px;">
+    <h2 class="section-title">Why NovelNest?</h2>
+    <p class="section-subtitle">Experience a seamless reading transition and secure home delivery.</p>
+</div>
+
+<div class="wallet-section" style="margin-top: 20px;">
+    <div class="wallet-grid">
+        <!-- Why Us points list -->
+        <div class="wallet-left">
+            <div class="wallet-balance-wrap" style="margin-bottom: 25px;">
+                <div class="wallet-balance-title">Our Operational Guarantee</div>
+                <div class="wallet-balance" style="font-size: 2.8rem;">
+                    Premium Service
+                    <span style="font-size: 1rem; padding: 4px 10px;">Verified</span>
+                </div>
+            </div>
+
+            <!-- Points styled as high-fidelity transaction items -->
+            <div class="tx-list">
+                <div class="tx-item">
+                    <div class="tx-info">
+                        <div class="tx-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div>
+                            <div class="tx-name">Huge Collection</div>
+                            <div class="tx-date">Thousands of titles across every genre</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tx-item">
+                    <div class="tx-info">
+                        <div class="tx-icon"><i class="fa-solid fa-tags"></i></div>
+                        <div>
+                            <div class="tx-name">Best Prices</div>
+                            <div class="tx-date">Affordable books for every budget</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tx-item">
+                    <div class="tx-info">
+                        <div class="tx-icon"><i class="fa-solid fa-truck-fast"></i></div>
+                        <div>
+                            <div class="tx-name">Fast Delivery</div>
+                            <div class="tx-date">Get your books at your doorstep</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tx-item">
+                    <div class="tx-info">
+                        <div class="tx-icon"><i class="fa-solid fa-lock"></i></div>
+                        <div>
+                            <div class="tx-name">Secure Checkout</div>
+                            <div class="tx-date">Safe and easy payment process</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Satisfaction Meter -->
+        <div class="wallet-right">
+            <div class="meter-container">
+                <svg class="meter-svg" viewBox="0 0 240 240">
+                    <!-- Background Track -->
+                    <circle class="meter-bg" cx="120" cy="120" r="100" />
+                    <!-- Foreground Fill (99% filled) -->
+                    <circle class="meter-fill" cx="120" cy="120" r="100" style="stroke-dashoffset: 6;" /> <!-- 628 * 0.01 = ~6 -->
+                </svg>
+
+                <div class="meter-content">
+                    <div class="meter-icon"><i class="fa-solid fa-heart"></i></div>
+                    <div class="meter-percentage">99%</div>
+                    <div class="meter-label">Customer Satisfaction</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 4: Best Sellers / Featured Books Section -->
+<div style="margin-bottom: 80px;">
+    <div class="section-title-wrap">
+        <h2 class="section-title">Trending This Week</h2>
+        <p class="section-subtitle">Handpicked bestsellers and popular releases on NovelNest.</p>
+    </div>
+
+    {% if books %}
+        <div class="book-grid" style="margin-top: 10px;">
+            {% for book in books %}
+                <div class="book-card">
+                    <div class="book-image-container">
+                        {% if book.image_url %}
+                            <img src="{{ book.image_url }}" alt="{{ book.title }} Cover">
+                        {% else %}
+                            <i class="fa-solid fa-book" style="font-size: 5rem; color: var(--text-muted);"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="book-details">
+                        <a href="{{ url_for('book_detail', book_id=book.id) }}" class="book-title">{{ book.title }}</a>
+                        <div class="book-author">by {{ book.author }}</div>
+                        
+                        <div class="book-footer">
+                            <span class="book-price">₹{{ "%.2f"|format(book.price) }}</span>
+                            
+                            <form action="{{ url_for('add_to_cart', book_id=book.id) }}" method="POST">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn-sm">
+                                    <i class="fa-solid fa-cart-plus"></i> Add
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); border-radius: var(--radius);">
+            <p style="color: var(--text-muted);">No books available. Please seed the database first.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Section 5: Call to Action Banner -->
+<div class="hero-banner" style="background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 60%), rgba(17, 24, 39, 0.45); border-radius: var(--radius-lg); border: 1px solid var(--border); text-align: center; padding: 60px 40px; margin-bottom: 40px; box-shadow: var(--shadow-lg);">
+    <h2 class="section-title" style="font-size: 2.2rem; margin-bottom: 12px;">New Here? Get Started in Seconds</h2>
+    <p class="section-subtitle" style="margin-bottom: 25px;">Create your free account and start building your personal library today.</p>
+    {% if not session.get('username') %}
+        <a href="{{ url_for('register') }}" class="btn-primary" style="text-decoration: none;">Create Account <i class="fa-solid fa-arrow-right-to-bracket" style="font-size: 0.8rem; margin-left: 6px;"></i></a>
+    {% else %}
+        <a href="{{ url_for('catalog') }}" class="btn-primary" style="text-decoration: none;">Browse Bestsellers <i class="fa-solid fa-arrow-right-long" style="font-size: 0.8rem; margin-left: 6px;"></i></a>
+    {% endif %}
+</div>
+{% endblock %}

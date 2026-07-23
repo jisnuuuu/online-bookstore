@@ -34,8 +34,8 @@
                                 {% if item.book.image_url %}
                                     <img src="{{ item.book.image_url }}" alt="{{ item.book.title }}" style="width: 50px; border-radius: 4px; box-shadow: var(--shadow-sm);">
                                 {% else %}
-                                    <div style="width: 50px; height: 70px; background-color: #f1f5f9; display: flex; align-items: center; justify-content: center; border-radius: 4px;">
-                                        <i class="fa-solid fa-book" style="color: #cbd5e1;"></i>
+                                    <div style="width: 50px; height: 70px; background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                        <i class="fa-solid fa-book" style="color: var(--text-muted);"></i>
                                     </div>
                                 {% endif %}
                                 <div>

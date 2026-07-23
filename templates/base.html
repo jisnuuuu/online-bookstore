@@ -13,31 +13,36 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    <!-- Floating Aurora Glow Orbs -->
+    <div class="glow-orb-1"></div>
+    <div class="glow-orb-2"></div>
+
     <!-- Top Navigation Bar -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="{{ url_for('index') }}" class="nav-logo">
-                <i class="fa-solid fa-book-open"></i> NovelNest
+                📚 NovelNest
             </a>
             
-            <form action="{{ url_for('index') }}" method="GET" class="nav-search">
+            <form action="{{ url_for('catalog') }}" method="GET" class="nav-search">
                 <input type="text" name="search" placeholder="Search by title or author..." value="{{ search_query or '' }}">
                 <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
             </form>
             
             <div class="nav-links">
                 <a href="{{ url_for('index') }}" class="nav-item">Home</a>
+                <a href="{{ url_for('catalog') }}" class="nav-item">Browse Books</a>
                 <div class="nav-dropdown">
                     <button class="nav-item dropdown-toggle" type="button" aria-expanded="false">
                         <i class="fa-solid fa-layer-group"></i> Categories <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem; margin-left: 3px;"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a href="{{ url_for('index') }}" class="dropdown-item {% if not selected_category %}active{% endif %}">
+                        <a href="{{ url_for('catalog') }}" class="dropdown-item {% if not selected_category %}active{% endif %}">
                             <i class="fa-solid fa-border-all"></i> All Genres
                         </a>
                         <div class="dropdown-divider"></div>
                         {% for cat in all_categories %}
-                            <a href="{{ url_for('index', category=cat.name) }}" class="dropdown-item {% if selected_category == cat.name %}active{% endif %}">
+                            <a href="{{ url_for('catalog', category=cat.name) }}" class="dropdown-item {% if selected_category == cat.name %}active{% endif %}">
                                 <i class="fa-solid {{ cat.icon }}"></i> {{ cat.name }}
                                 <span class="cat-count-badge">{{ cat.count }}</span>
                             </a>
@@ -50,7 +55,6 @@
                         <span class="nav-badge wishlist-badge">{{ wishlist_count }}</span>
                     {% endif %}
                 </a>
-                
                 <a href="{{ url_for('view_cart') }}" class="nav-item cart-btn">
                     <i class="fa-solid fa-cart-shopping"></i> Cart
                     {% if cart_count > 0 %}
@@ -65,7 +69,7 @@
                     {% endif %}
                     <a href="{{ url_for('logout') }}" class="nav-item logout-btn">Logout</a>
                 {% else: %}
-                    <a href="{{ url_for('login') }}" class="nav-item login-btn">Login</a>
+                    <a href="{{ url_for('login') }}" class="nav-item login-btn">Login/Signup</a>
                 {% endif %}
             </div>
         </div>
@@ -93,7 +97,16 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
-            <p>&copy; 2026 NovelNest Internship Project. Designed by GUNGALI & JYOTISHMAN.</p>
+            <div style="margin-bottom: 12px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <a href="#" style="color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: var(--transition);">About Us</a>
+                <span style="color: rgba(255,255,255,0.1);">|</span>
+                <a href="#" style="color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: var(--transition);">Contact</a>
+                <span style="color: rgba(255,255,255,0.1);">|</span>
+                <a href="#" style="color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: var(--transition);">Terms & Conditions</a>
+                <span style="color: rgba(255,255,255,0.1);">|</span>
+                <a href="#" style="color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem; transition: var(--transition);">Privacy Policy</a>
+            </div>
+            <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 10px;">&copy; 2026 NovelNest. All rights reserved.</p>
         </div>
     </footer>
 
