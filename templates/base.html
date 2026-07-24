@@ -63,7 +63,9 @@
                 </a>
                 
                 {% if session.get('username') %}
-                    <span class="user-greeting">Hi, {{ session.username }}</span>
+                    <a href="{{ url_for('account') }}" class="nav-item account-btn" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-user-gear"></i> My Account
+                    </a>
                     {% if session.get('is_admin') %}
                         <a href="#" class="nav-item admin-badge">Admin</a>
                     {% endif %}

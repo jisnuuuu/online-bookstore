@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}My Account - NovelNest{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+
+    <!-- Page Header -->
+    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 40px;">
+        <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 800; color: #fff; flex-shrink: 0;">
+            {{ user.username[0].upper() }}
+        </div>
+        <div>
+            <h1 style="font-size: 1.9rem; font-weight: 800; color: var(--text-main); margin-bottom: 4px;">{{ user.username }}</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">{{ user.email }}</p>
+        </div>
+        {% if user.is_admin %}
+            <span style="margin-left: auto; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 5px 14px; border-radius: 999px; letter-spacing: 0.5px;">
+                <i class="fa-solid fa-shield-halved"></i> Admin
+            </span>
+        {% endif %}
+    </div>
+
+    <!-- Stats Row -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px;">
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; backdrop-filter: blur(12px);">
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary); margin-bottom: 6px;">{{ orders|length }}</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-box"></i> Total Orders</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; backdrop-filter: blur(12px);">
+            <div style="font-size: 2.2rem; font-weight: 800; color: #ef4444; margin-bottom: 6px;">{{ wishlist_count }}</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-heart"></i> Wishlist Items</div>
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; text-align: center; backdrop-filter: blur(12px);">
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--accent); margin-bottom: 6px;">{{ cart_count_db }}</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); font-weight: 500;"><i class="fa-solid fa-cart-shopping"></i> Cart Items</div>
+        </div>
+    </div>
+
+    <!-- Profile Info Card -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; backdrop-filter: blur(12px); margin-bottom: 30px;">
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+            <i class="fa-solid fa-user" style="color: var(--primary);"></i> Profile Details
+        </h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px;">Username</div>
+                <div style="font-weight: 600; color: var(--text-main); font-size: 1rem;">{{ user.username }}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px;">Email Address</div>
+                <div style="font-weight: 600; color: var(--text-main); font-size: 1rem;">{{ user.email }}</div>
+            </div>
+            <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px;">Account Type</div>
+                <div style="font-weight: 600; color: var(--text-main); font-size: 1rem;">
+                    {% if user.is_admin %}<span style="color: #f59e0b;">Administrator</span>{% else %}Standard Member{% endif %}
+                </div>
+            </div>
+            <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px;">Member Since</div>
+                <div style="font-weight: 600; color: var(--text-main); font-size: 1rem;">NovelNest Member</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);">
+            <a href="{{ url_for('wishlist') }}" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); padding: 10px 20px; border-radius: 999px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.2)'" onmouseout="this.style.background='rgba(239,68,68,0.1)'">
+                <i class="fa-solid fa-heart"></i> My Wishlist
+            </a>
+            <a href="{{ url_for('view_cart') }}" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(14,165,233,0.1); color: var(--accent); border: 1px solid rgba(14,165,233,0.2); padding: 10px 20px; border-radius: 999px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(14,165,233,0.2)'" onmouseout="this.style.background='rgba(14,165,233,0.1)'">
+                <i class="fa-solid fa-cart-shopping"></i> My Cart
+            </a>
+            <a href="{{ url_for('catalog') }}" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16,185,129,0.1); color: var(--primary); border: 1px solid rgba(16,185,129,0.2); padding: 10px 20px; border-radius: 999px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'">
+                <i class="fa-solid fa-book-open"></i> Browse Books
+            </a>
+            <a href="{{ url_for('logout') }}" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid var(--border); padding: 10px 20px; border-radius: 999px; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; margin-left: auto;" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Order History -->
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; backdrop-filter: blur(12px);">
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i> Order History
+        </h2>
+
+        {% if orders %}
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                {% for order in orders %}
+                    <div style="border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;">
+                        <!-- Order Header -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;">
+                            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Order #{{ order.id }}</div>
+                                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</div>
+                                </div>
+                                <div>
+                                    <span style="
+                                        padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700;
+                                        {% if order.status == 'Completed' %}background: rgba(16,185,129,0.15); color: var(--primary); border: 1px solid rgba(16,185,129,0.25);
+                                        {% elif order.status == 'Cancelled' %}background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.25);
+                                        {% else %}background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.25);{% endif %}
+                                    ">
+                                        <i class="fa-solid {% if order.status == 'Completed' %}fa-circle-check{% elif order.status == 'Cancelled' %}fa-circle-xmark{% else %}fa-hourglass-half{% endif %}"></i>
+                                        {{ order.status }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Total</div>
+                                <div style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">₹{{ "%.2f"|format(order.total_amount) }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <div style="padding: 16px 20px;">
+                            {% if order.items %}
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    {% for item in order.items %}
+                                        <div style="display: flex; align-items: center; gap: 14px;">
+                                            {% if item.book and item.book.image_url %}
+                                                <img src="{{ item.book.image_url }}" alt="{{ item.book.title }}" style="width: 42px; height: 58px; object-fit: cover; border-radius: 4px; box-shadow: var(--shadow-sm); flex-shrink: 0;">
+                                            {% else %}
+                                                <div style="width: 42px; height: 58px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                                    <i class="fa-solid fa-book" style="color: var(--text-muted); font-size: 0.9rem;"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div style="flex: 1; min-width: 0;">
+                                                <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                                    {% if item.book %}
+                                                        <a href="{{ url_for('book_detail', book_id=item.book.id) }}" style="color: var(--text-main); text-decoration: none;">{{ item.book.title }}</a>
+                                                    {% else %}
+                                                        Deleted Book
+                                                    {% endif %}
+                                                </div>
+                                                <div style="font-size: 0.82rem; color: var(--text-muted);">Qty: {{ item.quantity }} × ₹{{ "%.2f"|format(item.price) }}</div>
+                                            </div>
+                                            <div style="font-weight: 700; color: var(--text-main); flex-shrink: 0;">₹{{ "%.2f"|format(item.price * item.quantity) }}</div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">No item details available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 50px 20px;">
+                <i class="fa-solid fa-box-open" style="font-size: 3.5rem; color: var(--text-muted); margin-bottom: 16px;"></i>
+                <h3 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 8px;">No orders yet</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">You haven't placed any orders. Start exploring our catalog!</p>
+                <a href="{{ url_for('catalog') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 28px; text-decoration: none; border-radius: 999px;">
+                    <i class="fa-solid fa-book-open"></i> Browse Books
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+@media(max-width: 640px) {
+    .account-stats { grid-template-columns: 1fr !important; }
+}
+</style>
+{% endblock %}

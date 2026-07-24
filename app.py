@@ -483,7 +483,24 @@ def move_to_cart(book_id):
         
     db.session.commit()
     flash(f'Moved "{book.title}" to your shopping cart!', 'success')
-    return redirect(url_for('view_cart'))
+    return redirect(url_for('wishlist'))
+
+
+@app.route('/account')
+def account():
+    """
+    My Account page showing user profile and order history.
+    """
+    if 'user_id' not in session:
+        flash('Please login to view your account.', 'warning')
+        return redirect(url_for('login'))
+
+    user = db.session.get(User, session['user_id'])
+    orders = Order.query.filter_by(user_id=user.id).order_by(Order.order_date.desc()).all()
+    wishlist_count = WishlistItem.query.filter_by(user_id=user.id).count()
+    cart_count_db = CartItem.query.filter_by(user_id=user.id).count()
+    return render_template('account.html', user=user, orders=orders,
+                           wishlist_count=wishlist_count, cart_count_db=cart_count_db)
 
 
 if __name__ == '__main__':

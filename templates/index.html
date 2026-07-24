@@ -21,14 +21,14 @@
             <i class="fa-solid fa-shapes" style="color: var(--primary);"></i> Browse Categories
         </h3>
         {% if selected_category or search_query %}
-            <a href="{{ url_for('index') }}" style="font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 500;">
+            <a href="{{ url_for('catalog') }}" style="font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 500;">
                 <i class="fa-solid fa-xmark"></i> Clear Filters
             </a>
         {% endif %}
     </div>
     
     <div class="category-pills-container">
-        <a href="{{ url_for('index', search=search_query) }}" 
+        <a href="{{ url_for('catalog', search=search_query) }}" 
            class="category-pill {% if not selected_category %}active{% endif %}">
             <i class="fa-solid fa-border-all"></i>
             <span>All Genres</span>
@@ -36,7 +36,7 @@
         </a>
         
         {% for cat in all_categories %}
-            <a href="{{ url_for('index', category=cat.name, search=search_query) }}" 
+            <a href="{{ url_for('catalog', category=cat.name, search=search_query) }}" 
                class="category-pill {% if selected_category == cat.name %}active{% endif %}">
                 <i class="fa-solid {{ cat.icon }}"></i>
                 <span>{{ cat.name }}</span>
@@ -66,13 +66,13 @@
                 {% if selected_category %}
                     <span class="active-filter-tag">
                         Genre: {{ selected_category }}
-                        <a href="{{ url_for('index', search=search_query) }}">&times;</a>
+                        <a href="{{ url_for('catalog', search=search_query) }}">&times;</a>
                     </span>
                 {% endif %}
                 {% if search_query %}
                     <span class="active-filter-tag">
                         Query: "{{ search_query }}"
-                        <a href="{{ url_for('index', category=selected_category) }}">&times;</a>
+                        <a href="{{ url_for('catalog', category=selected_category) }}">&times;</a>
                     </span>
                 {% endif %}
             </div>
@@ -88,7 +88,7 @@
             <div class="book-card">
                 <div class="book-image-container">
                     {% if book.genre %}
-                        <a href="{{ url_for('index', category=book.genre) }}" class="card-genre-badge">
+                        <a href="{{ url_for('catalog', category=book.genre) }}" class="card-genre-badge">
                             {{ book.genre }}
                         </a>
                     {% endif %}
@@ -130,7 +130,7 @@
         <i class="fa-solid fa-filter-circle-xmark" style="font-size: 4rem; color: var(--text-muted); margin-bottom: 20px;"></i>
         <h3 style="font-size: 1.3rem; margin-bottom: 10px; color: var(--secondary);">No books found in this category</h3>
         <p style="color: var(--text-muted); margin-bottom: 20px;">We couldn't find any books matching your selected filters.</p>
-        <a href="{{ url_for('index') }}" class="btn-sm" style="display: inline-flex; width: auto; margin: 0 auto; padding: 10px 20px;">
+        <a href="{{ url_for('catalog') }}" class="btn-sm" style="display: inline-flex; width: auto; margin: 0 auto; padding: 10px 20px;">
             <i class="fa-solid fa-rotate-left"></i> View All Categories
         </a>
     </div>
