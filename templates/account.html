@@ -95,7 +95,9 @@
                             <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
                                 <div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Order #{{ order.id }}</div>
-                                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}</div>
+                                    <div style="font-weight: 600; color: var(--text-main); font-size: 0.95rem;">
+                                        {% if order.order_date %}{{ order.order_date.strftime('%d %b %Y, %I:%M %p') }}{% else %}—{% endif %}
+                                    </div>
                                 </div>
                                 <div>
                                     <span style="
@@ -107,6 +109,11 @@
                                         <i class="fa-solid {% if order.status == 'Completed' %}fa-circle-check{% elif order.status == 'Cancelled' %}fa-circle-xmark{% else %}fa-hourglass-half{% endif %}"></i>
                                         {{ order.status }}
                                     </span>
+                                    {% if order.razorpay_payment_id %}
+                                        <span style="margin-left: 6px; font-size: 0.75rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border);">
+                                            <i class="fa-solid fa-receipt" style="color: var(--accent);"></i> {{ order.razorpay_payment_id }}
+                                        </span>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div style="text-align: right;">

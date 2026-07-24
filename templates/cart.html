@@ -117,11 +117,36 @@
                 </div>
                 
                 {% if session.get('username') %}
-                    <form action="{{ url_for('checkout') }}" method="POST">
-                        <button type="submit" class="btn-primary" style="padding: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="fa-solid fa-credit-card"></i> Proceed to Checkout
-                        </button>
-                    </form>
+                    <button type="button" id="rzp-pay-btn" onclick="startRazorpayCheckout()" class="btn-primary" style="width: 100%; padding: 14px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})
+                    </button>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <i class="fa-solid fa-lock" style="color: var(--primary);"></i> 256-bit Encrypted Test Gateway
+                    </div>
+
+                    <!-- Test Mode Credentials Guide -->
+                    <div style="margin-top: 18px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 10px; padding: 14px;">
+                        <div style="font-size: 0.78rem; font-weight: 700; color: #f59e0b; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-flask"></i> TEST MODE — Use These Credentials
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px 12px;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;"><i class="fa-solid fa-credit-card"></i> Card Payment</div>
+                                <div style="font-size: 0.82rem; color: var(--text-main); font-family: monospace;">
+                                    Card: <strong>4111 1111 1111 1111</strong><br>
+                                    Expiry: <strong>Any future date</strong> (e.g. 12/28)<br>
+                                    CVV: <strong>Any 3 digits</strong> (e.g. 123)<br>
+                                    OTP: <strong>1234</strong>
+                                </div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px 12px;">
+                                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;"><i class="fa-solid fa-mobile-screen"></i> UPI Payment</div>
+                                <div style="font-size: 0.82rem; color: var(--text-main); font-family: monospace;">
+                                    UPI ID: <strong>success@razorpay</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 {% else %}
                     <a href="{{ url_for('login') }}" class="btn-primary" style="display: block; text-align: center; text-decoration: none; padding: 14px; text-transform: uppercase; letter-spacing: 0.5px;">
                         Login to Checkout
@@ -146,4 +171,125 @@
     }
 }
 </style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+async function startRazorpayCheckout() {
+    const payBtn = document.getElementById('rzp-pay-btn');
+    if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Initializing Payment...';
+    }
+
+    if (typeof Razorpay === 'undefined') {
+        alert("Razorpay payment script could not be loaded. Please check your internet connection or disable ad-blockers and try again.");
+        if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+        }
+        return;
+    }
+
+    try {
+        const response = await fetch("{{ url_for('create_razorpay_order') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+        
+        if (!response.ok) {
+            const errJson = await response.json().catch(() => ({}));
+            alert(errJson.message || "Failed to create order on server (Status " + response.status + ")");
+            if (payBtn) {
+                payBtn.disabled = false;
+                payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+            }
+            return;
+        }
+
+        const data = await response.json();
+
+        if (data.status !== "success") {
+            alert(data.message || "Could not initiate payment.");
+            if (payBtn) {
+                payBtn.disabled = false;
+                payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+            }
+            return;
+        }
+
+        const options = {
+            "key": data.key_id,
+            "amount": data.amount,
+            "currency": data.currency || "INR",
+            "name": "NovelNest",
+            "description": "Bookstore Order Payment",
+            "theme": { "color": "#10b981" },
+            "prefill": {
+                "name": data.user_name || "",
+                "email": data.user_email || ""
+            },
+            "handler": async function (rzpRes) {
+                if (payBtn) payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Payment...';
+                
+                try {
+                    const verifyRes = await fetch("{{ url_for('verify_razorpay_payment') }}", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            razorpay_order_id: rzpRes.razorpay_order_id || data.razorpay_order_id,
+                            razorpay_payment_id: rzpRes.razorpay_payment_id || ("pay_test_" + Date.now()),
+                            razorpay_signature: rzpRes.razorpay_signature || "test_signature",
+                            db_order_id: data.db_order_id
+                        })
+                    });
+                    const verifyData = await verifyRes.json();
+                    if (verifyData.status === "success") {
+                        window.location.href = verifyData.redirect_url;
+                    } else {
+                        alert(verifyData.message || "Payment verification failed.");
+                        if (payBtn) {
+                            payBtn.disabled = false;
+                            payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+                        }
+                    }
+                } catch(e) {
+                    alert("Error verifying payment: " + e.message);
+                    if (payBtn) {
+                        payBtn.disabled = false;
+                        payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+                    }
+                }
+            },
+            "modal": {
+                "ondismiss": function() {
+                    if (payBtn) {
+                        payBtn.disabled = false;
+                        payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+                    }
+                }
+            }
+        };
+
+        if (data.razorpay_order_id && data.razorpay_order_id.startsWith('order_')) {
+            options.order_id = data.razorpay_order_id;
+        }
+
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function (response){
+            alert("Payment failed: " + (response.error ? response.error.description : "Unknown error"));
+            if (payBtn) {
+                payBtn.disabled = false;
+                payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+            }
+        });
+        rzp.open();
+    } catch (err) {
+        console.error(err);
+        alert("Error opening Razorpay checkout: " + (err.message || err));
+        if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Pay with Razorpay (₹{{ "%.2f"|format(total_price) }})';
+        }
+    }
+}
+</script>
 {% endblock %}

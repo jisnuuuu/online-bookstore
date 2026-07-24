@@ -65,7 +65,12 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
     total_amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(50), default='Pending') # Pending, Completed, Cancelled
+    status = db.Column(db.String(50), default='Pending') # Pending, Completed, Failed, Cancelled
+    
+    # Razorpay Payment Gateway tracking
+    razorpay_order_id = db.Column(db.String(100), nullable=True)
+    razorpay_payment_id = db.Column(db.String(100), nullable=True)
+    razorpay_signature = db.Column(db.String(200), nullable=True)
     
     # Relationships
     items = db.relationship('OrderItem', backref='order', lazy=True)
