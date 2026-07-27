@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     <!-- Floating Aurora Glow Orbs -->
     <div class="glow-orb-1"></div>
     <div class="glow-orb-2"></div>
@@ -50,9 +50,9 @@
                     </div>
                 </div>
                 <a href="{{ url_for('wishlist') }}" class="nav-item wishlist-btn">
-                    <i class="fa-solid fa-heart" style="color: #ef4444;"></i> Wishlist
+                    <i class="fa-solid fa-bookmark" style="color: var(--primary);"></i> Wishlist
                     {% if wishlist_count > 0 %}
-                        <span class="nav-badge wishlist-badge">{{ wishlist_count }}</span>
+                        <span class="nav-badge wishlist-badge" style="background-color: var(--primary);">{{ wishlist_count }}</span>
                     {% endif %}
                 </a>
                 <a href="{{ url_for('view_cart') }}" class="nav-item cart-btn">

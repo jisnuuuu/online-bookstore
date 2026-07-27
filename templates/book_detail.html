@@ -54,34 +54,38 @@
             </div>
 
             <!-- Add to Cart & Wishlist Actions -->
-            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-                <form action="{{ url_for('add_to_cart', book_id=book.id) }}" method="POST" style="display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap; margin-top: 25px;">
+                <!-- Save to Wishlist -->
+                <div style="display: flex; flex-direction: column; gap: 5px;">
+                    <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500; visibility: hidden;">Wishlist</span>
+                    <a href="{{ url_for('add_to_wishlist', book_id=book.id) }}" 
+                       class="btn-outline-wishlist {% if book.id in user_wishlist_ids %}active{% endif %}" 
+                       style="height: 42px; display: inline-flex; align-items: center; gap: 8px; padding: 0 20px; box-sizing: border-box; margin: 0;">
+                        <i class="{% if book.id in user_wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+                        {% if book.id in user_wishlist_ids %}In Wishlist{% else %}Save to Wishlist{% endif %}
+                    </a>
+                </div>
+
+                <form action="{{ url_for('add_to_cart', book_id=book.id) }}" method="POST" style="display: flex; align-items: flex-end; gap: 15px; margin: 0;">
                     {% if book.stock > 0 %}
                         <div style="display: flex; flex-direction: column; gap: 5px;">
                             <label for="quantity" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Quantity</label>
-                            <select name="quantity" id="quantity" class="form-control" style="width: 80px; padding: 6px;">
+                            <select name="quantity" id="quantity" class="form-control" style="width: 80px; padding: 8px 12px; height: 42px; box-sizing: border-box; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; color: white;">
                                 {% for i in range(1, (book.stock + 1) if book.stock < 10 else 11) %}
-                                    <option value="{{ i }}">{{ i }}</option>
+                                    <option value="{{ i }}" style="background: var(--surface-solid); color: white;">{{ i }}</option>
                                 {% endfor %}
                             </select>
                         </div>
 
-                        <button type="submit" class="btn-primary" style="padding: 12px 25px; display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;">
+                        <button type="submit" class="btn-primary" style="padding: 0 25px; height: 42px; display: inline-flex; align-items: center; gap: 8px; width: auto; margin: 0; box-sizing: border-box;">
                             <i class="fa-solid fa-cart-plus"></i> Add to Cart
                         </button>
                     {% else %}
-                        <span style="background-color: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 10px 20px; border-radius: 8px; font-weight: 600; margin-top: 20px;">
+                        <span style="background-color: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0 20px; border-radius: 8px; font-weight: 600; height: 42px; display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box;">
                             <i class="fa-solid fa-triangle-exclamation"></i> Out of Stock
                         </span>
                     {% endif %}
                 </form>
-
-                <a href="{{ url_for('add_to_wishlist', book_id=book.id) }}" 
-                   class="btn-outline-wishlist {% if book.id in user_wishlist_ids %}active{% endif %}" 
-                   style="margin-top: 20px;">
-                    <i class="{% if book.id in user_wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
-                    {% if book.id in user_wishlist_ids %}In Wishlist{% else %}Save to Wishlist{% endif %}
-                </a>
             </div>
             
             <div style="margin-top: 15px; font-size: 0.9rem; color: var(--text-muted);">
@@ -97,6 +101,61 @@
         </div>
     </div>
 </div>
+
+<!-- More Books Section -->
+{% if more_books %}
+<div style="margin-top: 50px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 1.6rem; font-weight: 700; color: var(--secondary); display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-book-open" style="color: var(--primary);"></i> More Books You May Like
+        </h2>
+        <a href="{{ url_for('catalog') }}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 5px;">
+            View All <i class="fa-solid fa-arrow-right"></i>
+        </a>
+    </div>
+    <div class="book-grid">
+        {% for rec_book in more_books %}
+            <div class="book-card">
+                <div class="book-image-container">
+                    {% if rec_book.genre %}
+                        <a href="{{ url_for('catalog', category=rec_book.genre) }}" class="card-genre-badge">
+                            {{ rec_book.genre }}
+                        </a>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('add_to_wishlist', book_id=rec_book.id) }}" 
+                       class="wishlist-toggle-btn {% if rec_book.id in user_wishlist_ids %}active{% endif %}" 
+                       title="{% if rec_book.id in user_wishlist_ids %}Remove from Wishlist{% else %}Save to Wishlist{% endif %}">
+                        <i class="{% if rec_book.id in user_wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+                    </a>
+
+                    {% if rec_book.image_url %}
+                        <img src="{{ rec_book.image_url }}" alt="{{ rec_book.title }} Cover">
+                    {% else %}
+                        <i class="fa-solid fa-book" style="font-size: 5rem; color: #cbd5e1;"></i>
+                    {% endif %}
+                </div>
+                
+                <div class="book-details">
+                    <a href="{{ url_for('book_detail', book_id=rec_book.id) }}" class="book-title">{{ rec_book.title }}</a>
+                    <div class="book-author">by {{ rec_book.author }}</div>
+                    
+                    <div class="book-footer">
+                        <span class="book-price">₹{{ "%.2f"|format(rec_book.price) }}</span>
+                        
+                        <form action="{{ url_for('add_to_cart', book_id=rec_book.id) }}" method="POST">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn-sm">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 
 <style>
 @media(max-width: 768px) {

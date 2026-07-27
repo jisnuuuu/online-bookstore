@@ -4,6 +4,8 @@
     {% if form_type == 'login' %}Login - NovelNest{% else %}Register - NovelNest{% endif %}
 {% endblock %}
 
+{% block body_class %}login-page{% endblock %}
+
 {% block content %}
 <div class="form-container">
     {% if form_type == 'login' %}

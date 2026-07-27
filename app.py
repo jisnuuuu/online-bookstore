@@ -23,6 +23,18 @@ db.init_app(app)
 # Automatically create tables if they do not exist
 with app.app_context():
     db.create_all()
+    # Auto-migrate: add Razorpay columns to orders table if missing (SQLite doesn't support ALTER via ORM)
+    with db.engine.connect() as _conn:
+        _existing = [row[1] for row in _conn.execute(db.text('PRAGMA table_info(orders)'))]
+        for _col, _type in [
+            ('razorpay_order_id',   'VARCHAR(200)'),
+            ('razorpay_payment_id', 'VARCHAR(200)'),
+            ('razorpay_signature',  'VARCHAR(500)'),
+        ]:
+            if _col not in _existing:
+                _conn.execute(db.text(f'ALTER TABLE orders ADD COLUMN {_col} {_type}'))
+        _conn.commit()
+
 
 # Category Icon Mapping Helper
 GENRE_ICONS = {
@@ -132,7 +144,19 @@ def book_detail(book_id):
     if not book:
         flash('Book not found.', 'danger')
         return redirect(url_for('index'))
-    return render_template('book_detail.html', book=book)
+
+    # Fetch more books: same genre first, then fill with others
+    more_books = []
+    if book.genre:
+        same_genre = Book.query.filter(Book.genre == book.genre, Book.id != book.id).limit(8).all()
+        more_books.extend(same_genre)
+
+    if len(more_books) < 8:
+        exclude_ids = [book.id] + [b.id for b in more_books]
+        others = Book.query.filter(~Book.id.in_(exclude_ids)).limit(8 - len(more_books)).all()
+        more_books.extend(others)
+
+    return render_template('book_detail.html', book=book, more_books=more_books)
 
 
 @app.route('/register', methods=['GET', 'POST'])

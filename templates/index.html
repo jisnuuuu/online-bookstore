@@ -96,7 +96,7 @@
                     <a href="{{ url_for('add_to_wishlist', book_id=book.id) }}" 
                        class="wishlist-toggle-btn {% if book.id in user_wishlist_ids %}active{% endif %}" 
                        title="{% if book.id in user_wishlist_ids %}Remove from Wishlist{% else %}Save to Wishlist{% endif %}">
-                        <i class="{% if book.id in user_wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+                        <i class="{% if book.id in user_wishlist_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
                     </a>
 
                     {% if book.image_url %}

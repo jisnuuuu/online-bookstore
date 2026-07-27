@@ -584,6 +584,69 @@ main {
     text-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
 }
 
+/* LOGIN PAGE - White Theme Override */
+body.login-page .form-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    backdrop-filter: none;
+}
+
+body.login-page .form-container::before {
+    display: none;
+}
+
+body.login-page .form-title {
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: #111827;
+    color: #111827;
+}
+
+body.login-page .form-group label {
+    color: #374151;
+}
+
+body.login-page .form-control {
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    color: #111827;
+}
+
+body.login-page .form-control:focus {
+    border-color: #3b82f6;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+body.login-page .form-control::placeholder {
+    color: #9ca3af;
+}
+
+body.login-page .btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+body.login-page .btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+}
+
+body.login-page .form-footer-text {
+    color: #6b7280;
+}
+
+body.login-page .form-footer-text a {
+    color: #2563eb;
+}
+
+body.login-page .form-footer-text a:hover {
+    color: #1d4ed8;
+    text-shadow: none;
+}
+
 /* FLASH ALERTS */
 .message-container {
     margin-top: 15px;
