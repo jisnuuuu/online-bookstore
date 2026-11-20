@@ -20,8 +20,8 @@
         {% for item in wishlist_items %}
             <div class="book-card">
                 <div class="book-image-container">
-                    {% if item.book.genre %}
-                        <a href="{{ url_for('index', category=item.book.genre) }}" class="card-genre-badge">
+                    {% if item.book and item.book.genre %}
+                        <a href="{{ url_for('catalog', category=item.book.genre) }}" class="card-genre-badge">
                             {{ item.book.genre }}
                         </a>
                     {% endif %}
@@ -65,7 +65,7 @@
         <i class="fa-regular fa-bookmark" style="font-size: 5rem; color: var(--text-muted); margin-bottom: 25px;"></i>
         <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--secondary);">Your Wishlist is Empty</h3>
         <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 30px;">You haven't saved any books to your wishlist yet. Explore our catalog and click the bookmark icon to save your favorites!</p>
-        <a href="{{ url_for('index') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none; border-radius: 25px;">Explore Catalog</a>
+        <a href="{{ url_for('catalog') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none; border-radius: 25px;">Explore Catalog</a>
     </div>
 {% endif %}
 {% endblock %}

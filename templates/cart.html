@@ -8,6 +8,7 @@
 {% if cart_items %}
     <div class="cart-layout" style="display: grid; grid-template-columns: 2fr 1fr; gap: 40px;">
         <!-- Cart Items List -->
+        <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 15px;">
                 <h2 style="font-size: 1.25rem; font-weight: 600; color: var(--secondary);">Cart Items ({{ cart_items|length }})</h2>
                 <form action="{{ url_for('clear_cart') }}" method="POST">
@@ -91,7 +92,7 @@
             </table>
             
             <div style="margin-top: 25px; display: flex; justify-content: space-between; align-items: center;">
-                <a href="{{ url_for('index') }}" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                <a href="{{ url_for('catalog') }}" style="color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
                     <i class="fa-solid fa-arrow-left"></i> Continue Shopping
                 </a>
             </div>
@@ -160,7 +161,7 @@
         <i class="fa-solid fa-cart-flatbed-empty" style="font-size: 5rem; color: var(--text-muted); margin-bottom: 25px;"></i>
         <h3 style="font-size: 1.5rem; margin-bottom: 10px; color: var(--secondary);">Your Cart is Empty</h3>
         <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto 30px;">Before you check out, you must add some books to your shopping cart. You'll find lots of interesting books on our home page.</p>
-        <a href="{{ url_for('index') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none; border-radius: 25px;">Explore Catalog</a>
+        <a href="{{ url_for('catalog') }}" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 30px; text-decoration: none; border-radius: 25px;">Explore Catalog</a>
     </div>
 {% endif %}
 

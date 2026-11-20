@@ -4,8 +4,8 @@ import os
 import razorpay
 
 app = Flask(__name__)
-# Secret key is required for sessions and flashing messages
-app.secret_key = os.urandom(24)
+# Secret key is required for sessions and flashing messages (stable across restarts)
+app.secret_key = os.environ.get('SECRET_KEY', 'novelnest-insecure-dev-secret-key-change-in-prod')
 
 # Razorpay Configuration
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', 'rzp_test_THFyntDGlIgvv3')
@@ -14,8 +14,20 @@ RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', 'NVAN1z8ASln1dCqnF6x
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    if database_url.startswith('postgres://'):
+        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+elif os.environ.get('NETLIFY') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/database.db'
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Ensure instance folder exists
+os.makedirs(app.instance_path, exist_ok=True)
 
 # Bind database to the Flask application
 db.init_app(app)
@@ -24,16 +36,20 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
     # Auto-migrate: add Razorpay columns to orders table if missing (SQLite doesn't support ALTER via ORM)
-    with db.engine.connect() as _conn:
-        _existing = [row[1] for row in _conn.execute(db.text('PRAGMA table_info(orders)'))]
-        for _col, _type in [
-            ('razorpay_order_id',   'VARCHAR(200)'),
-            ('razorpay_payment_id', 'VARCHAR(200)'),
-            ('razorpay_signature',  'VARCHAR(500)'),
-        ]:
-            if _col not in _existing:
-                _conn.execute(db.text(f'ALTER TABLE orders ADD COLUMN {_col} {_type}'))
-        _conn.commit()
+    try:
+        if 'sqlite' in db.engine.name:
+            with db.engine.connect() as _conn:
+                _existing = [row[1] for row in _conn.execute(db.text('PRAGMA table_info(orders)'))]
+                for _col, _type in [
+                    ('razorpay_order_id',   'VARCHAR(200)'),
+                    ('razorpay_payment_id', 'VARCHAR(200)'),
+                    ('razorpay_signature',  'VARCHAR(500)'),
+                ]:
+                    if _col not in _existing:
+                        _conn.execute(db.text(f'ALTER TABLE orders ADD COLUMN {_col} {_type}'))
+                _conn.commit()
+    except Exception as _e:
+        print(f"[Migration Warning]: {_e}")
 
 
 # Category Icon Mapping Helper
@@ -107,15 +123,12 @@ def catalog():
     Book Catalog Storefront with Search & Genre Category Filter
     """
     search_query = request.args.get('search', '').strip()
-    selected_category = request.args.get('category', '').strip()
-    genre_query = request.args.get('genre', '').strip()
+    selected_category = request.args.get('category', '').strip() or request.args.get('genre', '').strip()
     
     query = Book.query
 
     if selected_category:
-        query = query.filter(Book.genre == selected_category)
-    elif genre_query:
-        query = query.filter(Book.genre.ilike(genre_query))
+        query = query.filter(Book.genre.ilike(selected_category))
 
     if search_query:
         query = query.filter(
@@ -131,7 +144,7 @@ def catalog():
         books=books, 
         search_query=search_query, 
         selected_category=selected_category,
-        genre_query=genre_query
+        genre_query=selected_category
     )
 
 
@@ -143,7 +156,7 @@ def book_detail(book_id):
     book = db.session.get(Book, book_id)
     if not book:
         flash('Book not found.', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('catalog'))
 
     # Fetch more books: same genre first, then fill with others
     more_books = []
@@ -165,12 +178,20 @@ def register():
     User Registration Route
     """
     if request.method == 'POST':
-        username = request.form.get('username')
-        email = request.form.get('email')
+        username = (request.form.get('username') or '').strip()
+        email = (request.form.get('email') or '').strip().lower()
         password = request.form.get('password')
         
+        if not username or not email or not password:
+            flash('All fields are required.', 'danger')
+            return redirect(url_for('register'))
+            
         if User.query.filter_by(email=email).first():
             flash('Email already registered!', 'danger')
+            return redirect(url_for('register'))
+
+        if User.query.filter_by(username=username).first():
+            flash('Username is already taken! Please choose another.', 'danger')
             return redirect(url_for('register'))
             
         new_user = User(username=username, email=email)
@@ -191,20 +212,36 @@ def login():
     User Login Route with Session Cart Merging.
     """
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = (request.form.get('email') or '').strip().lower()
+        password = request.form.get('password') or ''
         
+        if not email or not password:
+            flash('Please enter both email and password.', 'danger')
+            return redirect(url_for('login'))
+
         user = User.query.filter_by(email=email).first()
         if user and user.check_password(password):
             session['user_id'] = user.id
             session['username'] = user.username
             session['is_admin'] = user.is_admin
             
-            # Merge guest session cart into DB CartItem
+            # Merge guest session cart into DB CartItem safely
             session_cart = session.pop('cart', {})
-            if session_cart:
+            if session_cart and isinstance(session_cart, dict):
                 for b_id_str, qty in session_cart.items():
-                    b_id = int(b_id_str)
+                    try:
+                        b_id = int(b_id_str)
+                        qty = int(qty)
+                        if qty <= 0:
+                            continue
+                    except (ValueError, TypeError):
+                        continue
+
+                    # Verify book actually exists in DB
+                    book = db.session.get(Book, b_id)
+                    if not book:
+                        continue
+
                     existing_item = CartItem.query.filter_by(user_id=user.id, book_id=b_id).first()
                     if existing_item:
                         existing_item.quantity += qty
@@ -254,15 +291,20 @@ def view_cart():
                 })
     else:
         cart = session.get('cart', {})
-        for book_id_str, quantity in cart.items():
-            book = db.session.get(Book, int(book_id_str))
-            if book:
-                subtotal = book.price * quantity
+        for book_id_str, quantity in list(cart.items()):
+            try:
+                b_id = int(book_id_str)
+                qty = int(quantity)
+            except (ValueError, TypeError):
+                continue
+            book = db.session.get(Book, b_id)
+            if book and qty > 0:
+                subtotal = book.price * qty
                 total_price += subtotal
                 cart_items.append({
                     'id': None,
                     'book': book,
-                    'quantity': quantity,
+                    'quantity': qty,
                     'subtotal': subtotal
                 })
             
@@ -277,26 +319,51 @@ def add_to_cart(book_id):
     book = db.session.get(Book, book_id)
     if not book:
         flash('Book not found.', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('catalog'))
 
-    quantity = int(request.form.get('quantity', 1))
-    
+    try:
+        quantity = int(request.form.get('quantity', 1))
+        if quantity <= 0:
+            quantity = 1
+    except (ValueError, TypeError):
+        quantity = 1
+
+    if book.stock <= 0:
+        flash(f'Sorry, "{book.title}" is currently out of stock.', 'warning')
+        next_url = request.referrer or url_for('catalog')
+        return redirect(next_url)
+
     if 'user_id' in session:
         user_id = session['user_id']
         cart_item = CartItem.query.filter_by(user_id=user_id, book_id=book_id).first()
         if cart_item:
-            cart_item.quantity += quantity
+            new_qty = cart_item.quantity + quantity
+            if new_qty > book.stock:
+                cart_item.quantity = book.stock
+                flash(f'Reached maximum available stock ({book.stock}) for "{book.title}".', 'warning')
+            else:
+                cart_item.quantity = new_qty
+                flash(f'"{book.title}" added to your cart!', 'success')
         else:
-            cart_item = CartItem(user_id=user_id, book_id=book_id, quantity=quantity)
+            add_qty = min(quantity, book.stock)
+            cart_item = CartItem(user_id=user_id, book_id=book_id, quantity=add_qty)
             db.session.add(cart_item)
+            flash(f'"{book.title}" added to your cart!', 'success')
         db.session.commit()
     else:
         cart = session.get('cart', {})
         book_id_str = str(book_id)
-        cart[book_id_str] = cart.get(book_id_str, 0) + quantity
+        current_qty = cart.get(book_id_str, 0)
+        new_qty = current_qty + quantity
+        if new_qty > book.stock:
+            cart[book_id_str] = book.stock
+            flash(f'Reached maximum available stock ({book.stock}) for "{book.title}".', 'warning')
+        else:
+            cart[book_id_str] = new_qty
+            flash(f'"{book.title}" added to your cart!', 'success')
         session['cart'] = cart
+        session.modified = True
     
-    flash(f'"{book.title}" added to your cart!', 'success')
     next_url = request.referrer or url_for('view_cart')
     return redirect(next_url)
 
@@ -308,17 +375,23 @@ def update_cart(book_id):
     """
     action = request.form.get('action')
     quantity_input = request.form.get('quantity')
+    book = db.session.get(Book, book_id)
+    max_stock = book.stock if book else 999
 
     if 'user_id' in session:
         user_id = session['user_id']
         cart_item = CartItem.query.filter_by(user_id=user_id, book_id=book_id).first()
         if cart_item:
             if action == 'increase':
-                cart_item.quantity += 1
+                if cart_item.quantity < max_stock:
+                    cart_item.quantity += 1
+                else:
+                    flash(f'Only {max_stock} units available in stock.', 'warning')
             elif action == 'decrease':
                 cart_item.quantity -= 1
             elif quantity_input and quantity_input.isdigit():
-                cart_item.quantity = int(quantity_input)
+                val = int(quantity_input)
+                cart_item.quantity = min(val, max_stock)
             
             if cart_item.quantity <= 0:
                 db.session.delete(cart_item)
@@ -328,15 +401,20 @@ def update_cart(book_id):
         book_id_str = str(book_id)
         if book_id_str in cart:
             if action == 'increase':
-                cart[book_id_str] += 1
+                if cart[book_id_str] < max_stock:
+                    cart[book_id_str] += 1
+                else:
+                    flash(f'Only {max_stock} units available in stock.', 'warning')
             elif action == 'decrease':
                 cart[book_id_str] -= 1
             elif quantity_input and quantity_input.isdigit():
-                cart[book_id_str] = int(quantity_input)
+                val = int(quantity_input)
+                cart[book_id_str] = min(val, max_stock)
                 
             if cart[book_id_str] <= 0:
                 cart.pop(book_id_str)
             session['cart'] = cart
+            session.modified = True
 
     return redirect(url_for('view_cart'))
 
@@ -355,6 +433,7 @@ def remove_from_cart(book_id):
         cart = session.get('cart', {})
         cart.pop(str(book_id), None)
         session['cart'] = cart
+        session.modified = True
 
     flash('Item removed from cart.', 'info')
     return redirect(url_for('view_cart'))
@@ -370,6 +449,7 @@ def clear_cart():
         db.session.commit()
     else:
         session.pop('cart', None)
+        session.modified = True
         
     flash('Cart cleared.', 'info')
     return redirect(url_for('view_cart'))
@@ -403,13 +483,17 @@ def checkout():
             total += book.price * item.quantity
             order_items_data.append((book, item.quantity))
 
+    if not order_items_data:
+        flash('No valid items found in your cart.', 'warning')
+        return redirect(url_for('view_cart'))
+
     # Create Order
     order = Order(user_id=user_id, total_amount=total, status='Completed')
     db.session.add(order)
     db.session.flush()
     
     for book, quantity in order_items_data:
-        book.stock -= quantity
+        book.stock = max(0, book.stock - quantity)
         order_item = OrderItem(order_id=order.id, book_id=book.id, quantity=quantity, price=book.price)
         db.session.add(order_item)
         
@@ -433,6 +517,9 @@ def create_razorpay_order():
         
     user_id = session['user_id']
     user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({'status': 'error', 'message': 'User not found.'}), 404
+
     cart_items = CartItem.query.filter_by(user_id=user_id).all()
     
     if not cart_items:
@@ -448,6 +535,9 @@ def create_razorpay_order():
                 return jsonify({'status': 'error', 'message': f'Only {book.stock} units of "{book.title}" in stock.'}), 400
             total_amount += book.price * item.quantity
             order_items_data.append((book, item.quantity))
+
+    if not order_items_data:
+        return jsonify({'status': 'error', 'message': 'No valid items in cart.'}), 400
 
     amount_in_paise = int(round(total_amount * 100))
     
@@ -507,6 +597,14 @@ def verify_razorpay_payment():
     order = db.session.get(Order, db_order_id)
     if not order:
         return jsonify({'status': 'error', 'message': 'Order not found.'}), 404
+
+    # Security check: Ensure order belongs to logged-in user
+    if order.user_id != session['user_id']:
+        return jsonify({'status': 'error', 'message': 'Unauthorized.'}), 403
+
+    # Idempotency check: prevent duplicate stock decrement and status update
+    if order.status == 'Completed':
+        return jsonify({'status': 'success', 'redirect_url': url_for('account')})
 
     # Verify signature
     is_valid = False
@@ -573,7 +671,7 @@ def add_to_wishlist(book_id):
     book = db.session.get(Book, book_id)
     if not book:
         flash('Book not found.', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('catalog'))
         
     existing = WishlistItem.query.filter_by(user_id=user_id, book_id=book_id).first()
     if existing:
@@ -624,11 +722,18 @@ def move_to_cart(book_id):
     if not book:
         flash('Book not found.', 'danger')
         return redirect(url_for('wishlist'))
+
+    if book.stock <= 0:
+        flash(f'"{book.title}" is currently out of stock and cannot be added to cart.', 'warning')
+        return redirect(url_for('wishlist'))
         
     # Add to DB cart
     cart_item = CartItem.query.filter_by(user_id=user_id, book_id=book_id).first()
     if cart_item:
-        cart_item.quantity += 1
+        if cart_item.quantity < book.stock:
+            cart_item.quantity += 1
+        else:
+            flash(f'Reached maximum available stock for "{book.title}".', 'warning')
     else:
         db.session.add(CartItem(user_id=user_id, book_id=book_id, quantity=1))
         
