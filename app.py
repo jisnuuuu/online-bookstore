@@ -184,15 +184,15 @@ def register():
         
         if not username or not email or not password:
             flash('All fields are required.', 'danger')
-            return redirect(url_for('register'))
+            return redirect(url_for('register', username=username, email=email))
             
         if User.query.filter_by(email=email).first():
             flash('Email already registered!', 'danger')
-            return redirect(url_for('register'))
+            return redirect(url_for('register', username=username, email=email))
 
         if User.query.filter_by(username=username).first():
             flash('Username is already taken! Please choose another.', 'danger')
-            return redirect(url_for('register'))
+            return redirect(url_for('register', username=username, email=email))
             
         new_user = User(username=username, email=email)
         new_user.set_password(password)
@@ -203,7 +203,10 @@ def register():
         flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
         
-    return render_template('login.html', form_type='register')
+    # Pre-fill fields from query params (set after a failed registration redirect)
+    prefill_username = request.args.get('username', '')
+    prefill_email = request.args.get('email', '')
+    return render_template('login.html', form_type='register', prefill_username=prefill_username, prefill_email=prefill_email)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -253,8 +256,11 @@ def login():
             return redirect(url_for('catalog'))
         else:
             flash('Invalid email or password.', 'danger')
-            
-    return render_template('login.html', form_type='login')
+            return redirect(url_for('login', email=email))
+
+    # Pre-fill email from query param (set after a failed login redirect)
+    prefill_email = request.args.get('email', '')
+    return render_template('login.html', form_type='login', prefill_email=prefill_email)
 
 
 @app.route('/logout')
